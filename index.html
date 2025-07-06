@@ -4,76 +4,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>House Price Prediction</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
+            background: linear-gradient(to bottom, #1e3a8a, #3b82f6);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #1f2937;
         }
-        h1 {
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        footer {
+            margin-top: auto;
+            padding: 1rem;
             text-align: center;
-            color: #333;
+            color: #fff;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 1.2em;
-            color: #333;
-        }
-        .error {
-            color: red;
-        }
-        .warning {
-            color: orange;
+        input[type="range"]::-webkit-slider-thumb {
+            background: #3b82f6;
         }
     </style>
 </head>
-<body>
-    <h1>House Price Prediction</h1>
-    <p>Enter house details to predict the price based on a linear regression model.</p>
-    <div class="form-group">
-        <label for="square_feet">Square Footage:</label>
-        <input type="number" id="square_feet" placeholder="e.g., 2000" min="500" max="5000" required>
+<body class="font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-white text-center mb-6">House Price Prediction</h1>
+        <div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6 card">
+            <p class="text-gray-600 mb-4">Predict house prices using a linear regression model trained on house size, bedrooms, and bathrooms. For best results, use values within typical ranges: 500–5000 sq ft, 0–10 bedrooms, 0–10 bathrooms.</p>
+            
+            <div class="space-y-6">
+                <div>
+                    <label for="square_feet" class="block text-sm font-medium text-gray-700">Square Footage (500–5000)</label>
+                    <input type="range" id="square_feet" min="500" max="5000" value="2000" step="100" class="w-full h-2 bg-gray-200 rounded-lg cursor-pointer">
+                    <span id="square_feet_value" class="text-gray-600">2000 sq ft</span>
+                </div>
+                <div>
+                    <label for="bedrooms" class="block text-sm font-medium text-gray-700">Bedrooms (0–10)</label>
+                    <input type="range" id="bedrooms" min="0" max="10" value="3" step="1" class="w-full h-2 bg-gray-200 rounded-lg cursor-pointer">
+                    <span id="bedrooms_value" class="text-gray-600">3 bedrooms</span>
+                </div>
+                <div>
+                    <label for="bathrooms" class="block text-sm font-medium text-gray-700">Bathrooms (0–10)</label>
+                    <input type="range" id="bathrooms" min="0" max="10" value="2" step="1" class="w-full h-2 bg-gray-200 rounded-lg cursor-pointer">
+                    <span id="bathrooms_value" class="text-gray-600">2 bathrooms</span>
+                </div>
+                <button onclick="predictPrice()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Predict Price</button>
+            </div>
+            
+            <div id="result" class="mt-6 text-lg font-semibold text-center"></div>
+            <canvas id="priceGauge" class="mt-6" height="100"></canvas>
+        </div>
+        
+        <div class="mt-8 max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6 card">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">About the Model</h2>
+            <p class="text-gray-600">This model uses linear regression trained on a dataset of 20 houses with features: square footage (1100–2200), bedrooms (2–4), and bathrooms (1–3). Predictions are computed client-side using hardcoded coefficients. Results are most accurate within these ranges.</p>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="bedrooms">Number of Bedrooms:</label>
-        <input type="number" id="bedrooms" placeholder="e.g., 3" min="0" max="10" required>
-    </div>
-    <div class="form-group">
-        <label for="bathrooms">Number of Bathrooms:</label>
-        <input type="number" id="bathrooms" placeholder="e.g., 2" min="0" max="10" required>
-    </div>
-    <button onclick="predictPrice()">Predict Price</button>
-    <div id="result"></div>
+
+    <footer>
+        <p>Created by Manikandan | <a href="https://github.com/Manikandan306" class="text-blue-300 hover:underline">GitHub</a> | <a href="https://www.linkedin.com/in/manikandan306" class="text-blue-300 hover:underline">LinkedIn</a></p>
+    </footer>
 
     <script>
+        // Update slider values dynamically
+        document.getElementById('square_feet').addEventListener('input', function() {
+            document.getElementById('square_feet_value').textContent = `${this.value} sq ft`;
+        });
+        document.getElementById('bedrooms').addEventListener('input', function() {
+            document.getElementById('bedrooms_value').textContent = `${this.value} bedrooms`;
+        });
+        document.getElementById('bathrooms').addEventListener('input', function() {
+            document.getElementById('bathrooms_value').textContent = `${this.value} bathrooms`;
+        });
+
+        // Chart.js gauge for predicted price
+        const ctx = document.getElementById('priceGauge').getContext('2d');
+        const priceGauge = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Predicted Price'],
+                datasets: [{
+                    label: 'Price ($)',
+                    data: [0],
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        min: 0,
+                        max: 500000,
+                        title: { display: true, text: 'Price ($)' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
         function predictPrice() {
             const squareFeet = parseFloat(document.getElementById('square_feet').value);
             const bedrooms = parseInt(document.getElementById('bedrooms').value);
@@ -82,28 +127,35 @@
 
             // Validate inputs
             if (isNaN(squareFeet) || isNaN(bedrooms) || isNaN(bathrooms)) {
-                resultDiv.innerHTML = '<span class="error">Please enter valid numbers for all fields.</span>';
+                resultDiv.innerHTML = '<span class="text-red-500">Please enter valid numbers for all fields.</span>';
                 return;
             }
             if (squareFeet <= 0 || bedrooms < 0 || bathrooms < 0) {
-                resultDiv.innerHTML = '<span class="error">Square footage must be positive, and bedrooms/bathrooms must be non-negative.</span>';
+                resultDiv.innerHTML = '<span class="text-red-500">Square footage must be positive, and bedrooms/bathrooms must be non-negative.</span>';
                 return;
             }
 
             // Warn if inputs are outside training data range
+            let warning = '';
             if (squareFeet < 500 || squareFeet > 5000 || bedrooms > 10 || bathrooms > 10) {
-                resultDiv.innerHTML = '<span class="warning">Warning: Inputs are outside typical ranges (500-5000 sq ft, 0-10 bedrooms/bathrooms). Results may be less reliable.</span>';
+                warning = '<span class="text-yellow-600">Warning: Inputs are outside typical ranges (500–5000 sq ft, 0–10 bedrooms/bathrooms). Results may be less reliable.</span><br>';
             }
 
             // Linear regression coefficients (replace with values from main.py)
-            const coefSquareFeet = 150.25; // Example: replace with actual coef_square_feet
-            const coefBedrooms = 12000.50; // Example: replace with actual coef_bedrooms
-            const coefBathrooms = 18000.75; // Example: replace with actual coef_bathrooms
-            const intercept = 45000.00; // Example: replace with actual intercept
+            const coefSquareFeet = 150.25; // Replace with actual coef_square_feet
+            const coefBedrooms = 12000.50; // Replace with actual coef_bedrooms
+            const coefBathrooms = 18000.75; // Replace with actual coef_bathrooms
+            const intercept = 45000.00; // Replace with actual intercept
 
             // Calculate prediction
             const predictedPrice = intercept + (coefSquareFeet * squareFeet) + (coefBedrooms * bedrooms) + (coefBathrooms * bathrooms);
-            resultDiv.innerHTML = `Predicted Price: $${predictedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            // Update result with animation
+            resultDiv.innerHTML = `${warning}<span class="fade-in">Predicted Price: $${predictedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`;
+            
+            // Update gauge
+            priceGauge.data.datasets[0].data = [predictedPrice];
+            priceGauge.update();
         }
     </script>
 </body>
