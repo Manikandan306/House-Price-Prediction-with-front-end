@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .error {
+            color: red;
+        }
+        .warning {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+    <h1>House Price Prediction</h1>
+    <p>Enter house details to predict the price based on a linear regression model.</p>
+    <div class="form-group">
+        <label for="square_feet">Square Footage:</label>
+        <input type="number" id="square_feet" placeholder="e.g., 2000" min="500" max="5000" required>
+    </div>
+    <div class="form-group">
+        <label for="bedrooms">Number of Bedrooms:</label>
+        <input type="number" id="bedrooms" placeholder="e.g., 3" min="0" max="10" required>
+    </div>
+    <div class="form-group">
+        <label for="bathrooms">Number of Bathrooms:</label>
+        <input type="number" id="bathrooms" placeholder="e.g., 2" min="0" max="10" required>
+    </div>
+    <button onclick="predictPrice()">Predict Price</button>
+    <div id="result"></div>
+
+    <script>
+        function predictPrice() {
+            const squareFeet = parseFloat(document.getElementById('square_feet').value);
+            const bedrooms = parseInt(document.getElementById('bedrooms').value);
+            const bathrooms = parseInt(document.getElementById('bathrooms').value);
+            const resultDiv = document.getElementById('result');
+
+            // Validate inputs
+            if (isNaN(squareFeet) || isNaN(bedrooms) || isNaN(bathrooms)) {
+                resultDiv.innerHTML = '<span class="error">Please enter valid numbers for all fields.</span>';
+                return;
+            }
+            if (squareFeet <= 0 || bedrooms < 0 || bathrooms < 0) {
+                resultDiv.innerHTML = '<span class="error">Square footage must be positive, and bedrooms/bathrooms must be non-negative.</span>';
+                return;
+            }
+
+            // Warn if inputs are outside training data range
+            if (squareFeet < 500 || squareFeet > 5000 || bedrooms > 10 || bathrooms > 10) {
+                resultDiv.innerHTML = '<span class="warning">Warning: Inputs are outside typical ranges (500-5000 sq ft, 0-10 bedrooms/bathrooms). Results may be less reliable.</span>';
+            }
+
+            // Linear regression coefficients (replace with values from main.py)
+            const coefSquareFeet = 150.25; // Example: replace with actual coef_square_feet
+            const coefBedrooms = 12000.50; // Example: replace with actual coef_bedrooms
+            const coefBathrooms = 18000.75; // Example: replace with actual coef_bathrooms
+            const intercept = 45000.00; // Example: replace with actual intercept
+
+            // Calculate prediction
+            const predictedPrice = intercept + (coefSquareFeet * squareFeet) + (coefBedrooms * bedrooms) + (coefBathrooms * bathrooms);
+            resultDiv.innerHTML = `Predicted Price: $${predictedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+    </script>
+</body>
+</html>
