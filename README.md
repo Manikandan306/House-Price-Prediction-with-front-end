@@ -8,7 +8,6 @@ Web development with HTML, CSS, and JavaScript.
 Deploying a static website on GitHub Pages.
 
 Live Demo
-[Link to GitHub Pages site, e.g., https://your-username.github.io/house-price-prediction\]
 Project Structure
 house-price-prediction/
 ├── index.html          # Static web interface for predictions
